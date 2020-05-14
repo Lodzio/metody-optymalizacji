@@ -28,7 +28,7 @@ def plot(searchAlgorithm):
 
     x = [np.linspace(path[i][0], path[i + 1][0], 2) for i in range(len(path) - 1)]
     y = [np.linspace(path[i][1], path[i + 1][1], 2) for i in range(len(path) - 1)]
-    plt.plot(x, y, color="orangered")
+    plt.plot(x, y, color="red")
 
     plt.show()
 
