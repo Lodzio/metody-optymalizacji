@@ -1,7 +1,7 @@
 import numpy as np
 from py_expression_eval import Parser
 from goldenSection import goldenSectionSearch
-from graphs import plot_path_graph
+from graphs import plot
 
 
 class GaussSeidel:
@@ -88,4 +88,4 @@ if __name__ == '__main__':
     cg = GaussSeidel(function, x0, 2, 10e-3, 3000)
     pos = cg.getLowestPos()
     print("final pos: ", [round(x, 3) for x in pos])
-    plot_path_graph(cg)
+    plot(cg)

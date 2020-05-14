@@ -4,13 +4,13 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
 
-def count_function_value(parser_fun, *args):
+def getFuntionResult(parser_fun, *args):
     parameters = dict(zip(parser_fun.variables(), args))
     return parser_fun.evaluate(parameters)
 
 
-def plot_path_graph(searchAlgorithm):
-    vec_fun = np.vectorize(count_function_value)
+def plot(searchAlgorithm):
+    vec_fun = np.vectorize(getFuntionResult)
     path = searchAlgorithm.path
     bounds = []
     meshPoints = []
