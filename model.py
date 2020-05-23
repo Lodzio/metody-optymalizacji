@@ -1,91 +1,98 @@
 import numpy as np
 from py_expression_eval import Parser
 from goldenSection import goldenSectionSearch
-from graphs import plot
-
+from plot import plot
 
 class GaussSeidel:
-    def __init__(self, fun, startPoint, oneStepSize, epsilon, stepsLimit):
+    def __init__(self, fun, g,startPoint, stepSize, epsilon, stepsLimit):
         self.fun = fun
+        self.g = g
         self.epsilon = epsilon
         self.stepsLimit = stepsLimit
-        self.oneStepSize = oneStepSize
+        self.stepSize = stepSize
         self.path = []
-        self.positionIndex = 0
         self.stepNumber = 0
         self.currentPos = np.array(startPoint, dtype="float")
         self.variables = sorted(fun.variables())
         self.funResult = self.getFunctionResult()
+        self.e= [np.array([1, 0]), np.array([0, 1])]
+        self.logs = []
 
     def __str__(self):
+        parameters = dict(zip(self.variables, self.currentPos))
         strPoint = [str(round(axis, 3)) for axis in self.currentPos]
-        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {self.funResult}"
+        strFVal = self.fun.evaluate(parameters)
+        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}"
         return result
+
+    def calculatePunishment(self, parameters):
+        sum = 0
+        H = lambda x: 0 if x < 0 else 1
+        delta=self.epsilon
+        alpha = 100000
+        for gi in self.g:
+            gVal= gi.evaluate(parameters)
+            gArg = gVal + delta
+            deltaFun = alpha*(gArg**2)*H(gArg)
+            # print(gVal, H(gVal), deltaFun)
+            sum+=deltaFun
+
+        return sum
+
 
     def getFunctionResult(self, replace_val=None):
         parameters = dict(zip(self.variables, self.currentPos))
         if replace_val:
             parameters.update(replace_val)
-        return self.fun.evaluate(parameters)
-    
-    def getSearchBoundsAndVar(self):
-        curr_var = self.variables[self.positionIndex]
-        bound = []
-        for step in (-self.oneStepSize, self.oneStepSize):
-            bound.append(sorted([self.currentPos[self.positionIndex], self.currentPos[self.positionIndex] + step]))
-        variable = [(var, value) for var, value in zip(self.variables, self.currentPos) if var != curr_var]
-        return bound, variable
+        return self.fun.evaluate(parameters)+ self.calculatePunishment(parameters)
 
-    def getNextPosAndResult(self):
-        bounds, variable = self.getSearchBoundsAndVar()
-        nextPos = None
-        newFunResult = None
+    def getNextPosAndResult(self, pos, e):
+        left = pos + e* (-self.stepSize)
+        right = pos + e * (self.stepSize)
+        mini = goldenSectionSearch(self.getFunctionResult, left, right, self.epsilon)
+        miniVal = self.getFunctionResult({"x1": mini[0], "x2": mini[1]})
+        return mini, miniVal
 
-        for bound in bounds:
-            mini = goldenSectionSearch(self.fun, bound[0], bound[1], tuple(variable), self.epsilon)
-            miniVal = self.getFunctionResult({self.variables[self.positionIndex]: mini})
-            if not newFunResult or newFunResult > miniVal:
-                nextMove = mini
-                newFunResult = miniVal
-        return nextMove, newFunResult
+    def getNewE(self):
+        pos1, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[0])
+        pos2, nextFunResult = self.getNextPosAndResult(pos1, self.e[1])
+        newE = (pos2 - self.currentPos)/(np.linalg.norm(pos2 - self.currentPos))
+        return newE
 
-    def switchMoveDirection(self):
-        if self.positionIndex == len(self.variables) - 1:
-            self.positionIndex = 0
-        else:
-            self.positionIndex += 1
+
+    def switchMoveDirection(self, newE):
+        self.e[1] = self.e[0]
+        self.e[0] = newE
 
     def getLowestPos(self):
         while True:
-            print(self)
+            self.logs.append(str(self))
             self.path.append(tuple(self.currentPos))
-            localMinPosition, nextFunResult = self.getNextPosAndResult()
-
+            localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[0])
             stepsLimitReached = self.stepNumber == self.stepsLimit
             minFunDifferenceReached = abs(self.funResult - nextFunResult) <= self.epsilon
-            minPosDifferenceReached = np.linalg.norm(self.currentPos[self.positionIndex] - localMinPosition) <= self.epsilon
+            minPosDifferenceReached = np.linalg.norm(self.currentPos- localMinPosition) <= self.epsilon
 
             if stepsLimitReached or (minPosDifferenceReached and minFunDifferenceReached):
                 return tuple(self.currentPos)
 
-            self.currentPos[self.positionIndex] = localMinPosition
+            self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
-            self.switchMoveDirection()
+            self.switchMoveDirection(self.getNewE())
 
 
 if __name__ == '__main__':
     parser = Parser()
-    functions = [
-        "x1^2+x2^2+(x1*x2)^2",
-    ]
-
+    functionStr = "(x1^4)+(x2^4)-(2*(x1^2)*x2)-(4*x1)+3"
+    g=["4-x1-x2"]
     x0 = [-10, -6]
-    function = functions[0]
-    print("function", function)
-    function = parser.parse(function)
-
-    cg = GaussSeidel(function, x0, 2, 10e-3, 3000)
+    # print("function", function)
+    function = parser.parse(functionStr)
+    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 20, 10e-3, 3000)
     pos = cg.getLowestPos()
+    print('\n'.join(cg.logs))
     print("final pos: ", [round(x, 3) for x in pos])
+    print("f(x): ", function.evaluate({"x1": 1.9550, "x2": 2.0451}))
+    print("g(x): ", [parser.parse(gi).evaluate({"x1": pos[0], "x2": pos[1]}) for gi in g])
     plot(cg)
