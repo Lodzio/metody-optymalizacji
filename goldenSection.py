@@ -6,8 +6,9 @@ TAU = (np.sqrt(5) - 1) / 2
 def goldenSectionSearch(fun, a, b, epsilon):
     if np.linalg.norm(b - a) < epsilon:
         return (a + b) / 2
-    left = a + (1 - TAU) * (b - a)
-    right = b - (1 - TAU) * (b - a)
+    left = a + ((1 - TAU) * (b - a))
+    right = b - ((1 - TAU) * (b - a))
+    # print(left, right)
     # substitution = list(set(fun.variables()) - set(var[0] for var in searchVector))
     # parameters = {var: val for var, val in searchVector}
     # parametersValue = [{**parameters, substitution[0]: side} for side in (left, right)]

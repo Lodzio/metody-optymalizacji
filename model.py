@@ -17,6 +17,7 @@ class GaussSeidel:
         self.funResult = self.getFunctionResult()
         self.e= [np.array([1, 0]), np.array([0, 1])]
         self.logs = []
+        self.vectors = []
 
     def __str__(self):
         parameters = dict(zip(self.variables, self.currentPos))
@@ -49,6 +50,9 @@ class GaussSeidel:
     def getNextPosAndResult(self, pos, e):
         left = pos + e* (-self.stepSize)
         right = pos + e * (self.stepSize)
+        left2 = pos + e* (-self.stepSize/4)
+        right2 = pos + e * (self.stepSize/4)
+        self.vectors.append([left, right])
         mini = goldenSectionSearch(self.getFunctionResult, left, right, self.epsilon)
         miniVal = self.getFunctionResult({"x1": mini[0], "x2": mini[1]})
         return mini, miniVal
@@ -56,11 +60,14 @@ class GaussSeidel:
     def getNewE(self):
         pos1, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[0])
         pos2, nextFunResult = self.getNextPosAndResult(pos1, self.e[1])
-        newE = (pos2 - self.currentPos)/(np.linalg.norm(pos2 - self.currentPos))
+        diff = [pos2[0] - self.currentPos[0], pos2[1] - self.currentPos[1]]
+        newE = diff/(np.linalg.norm(pos2 - self.currentPos))
+        # print(diff, newE, (np.linalg.norm(pos2 - self.currentPos)))
         return newE
 
 
     def switchMoveDirection(self, newE):
+        x= self.e[1]
         self.e[1] = self.e[0]
         self.e[0] = newE
 
@@ -84,15 +91,15 @@ class GaussSeidel:
 
 if __name__ == '__main__':
     parser = Parser()
-    functionStr = "(x1^4)+(x2^4)-(2*(x1^2)*x2)-(4*x1)+3"
-    g=["4-x1-x2"]
-    x0 = [-10, -6]
+    functionStr = "(x1-2)^2+(x1-x2^2)^2"
+    g=["x1+x2-2", "2*x1^2-x2"]
+    # g=[]
+    x0 = [3, -3]
     # print("function", function)
     function = parser.parse(functionStr)
-    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 20, 10e-3, 3000)
+    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 0.5, 10e-3, 3000)
     pos = cg.getLowestPos()
     print('\n'.join(cg.logs))
     print("final pos: ", [round(x, 3) for x in pos])
-    print("f(x): ", function.evaluate({"x1": 1.9550, "x2": 2.0451}))
     print("g(x): ", [parser.parse(gi).evaluate({"x1": pos[0], "x2": pos[1]}) for gi in g])
     plot(cg)

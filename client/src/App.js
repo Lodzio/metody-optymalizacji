@@ -5,12 +5,22 @@ import axios from "axios";
 class App extends React.Component {
   state = {
     params: {
-      function: "(x1-2)^2+(x2-1)^2",
-      g1: "x1^2-x2",
-      g2: "x1+x2-2",
+      function: "(x1-2)^2+(x1-x2^2)^2",
+      g1: "x1+x2-2",
+      g2: "2*x1^2-x2",
       g3: "",
-      x1: "-10",
-      x2: "-6",
+      g4: "",
+      g5: "",
+      x1: "-2",
+      x2: "0",
+      // function: "",
+      // g1: "",
+      // g2: "",
+      // g3: "",
+      // g4: "",
+      // g5: "",
+      // x1: "",
+      // x2: "",
     },
     result: {
       pos: [],
@@ -52,6 +62,8 @@ class App extends React.Component {
           {this.withLabel("g1", <Input id="g1" onChange={this.onChange} />)}
           {this.withLabel("g2", <Input id="g2" onChange={this.onChange} />)}
           {this.withLabel("g3", <Input id="g3" onChange={this.onChange} />)}
+          {this.withLabel("g4", <Input id="g4" onChange={this.onChange} />)}
+          {this.withLabel("g5", <Input id="g5" onChange={this.onChange} />)}
           {this.withLabel("x1", <Input id="x1" onChange={this.onChange} />)}
           {this.withLabel("x2", <Input id="x2" onChange={this.onChange} />)}
           {this.withLabel("localStepSize", <Input id="localStepSize" onChange={this.onChange} />)}

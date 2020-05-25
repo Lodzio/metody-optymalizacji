@@ -24,16 +24,22 @@ def calculate():
     g1 = request.args.get('g1')
     g2 = request.args.get('g2')
     g3 = request.args.get('g3')
+    g4 = request.args.get('g4')
+    g5 = request.args.get('g5')
+
     g1 and g.append(g1)
     g2 and g.append(g2)
     g3 and g.append(g3)
+    g4 and g.append(g4)
+    g5 and g.append(g5)
+
     g = [parser.parse(gi) for gi in g]
 
     startPoint = [float(request.args.get('x1')), float(request.args.get('x2'))]
     print(function, g1, g2, g3, startPoint)
-    localStepSize = float(request.args.get('localStepSize', 10))
-    epsilon = float(request.args.get('epsilon', 10e-3))
-    stepsLimit = int(request.args.get('stepsLimit', 3000))
+    localStepSize = float(request.args.get('localStepSize', '10'))
+    epsilon = float(request.args.get('epsilon', '10e-3'))
+    stepsLimit = int(request.args.get('stepsLimit', '3000'))
     function = parser.parse(function)
     Process(target=showGraph, args=(function, g, startPoint, localStepSize, epsilon, stepsLimit)).start()
     cg = GaussSeidel(function, g, startPoint, localStepSize, epsilon, stepsLimit)
