@@ -6,7 +6,7 @@ from matplotlib import cm
 
 def getFuntionResult(parser_fun, fun, *args):
     parameters = dict(zip(parser_fun.variables(), args))
-    return 1/fun(parameters)
+    # return 1/fun(parameters)
     return parser_fun.evaluate(parameters)
 
 
@@ -29,8 +29,8 @@ def plot(searchAlgorithm):
 
     x = [np.linspace(path[i][0], path[i + 1][0], 2) for i in range(len(path) - 1)]
     y = [np.linspace(path[i][1], path[i + 1][1], 2) for i in range(len(path) - 1)]
-    for vector in searchAlgorithm.vectors:
-        plt.plot([vector[0][0], vector[1][0]], [vector[0][1], vector[1][1]], color="blue")
+    # for vector in searchAlgorithm.vectors:
+    #     plt.plot([vector[0][0], vector[1][0]], [vector[0][1], vector[1][1]], color="blue")
     plt.plot(x, y, color="red")
 
     plt.show()
