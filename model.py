@@ -57,25 +57,26 @@ class GaussSeidel:
         return mini, miniVal
 
     def getNewE(self):
-        pos1, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[0])
-        pos2, nextFunResult = self.getNextPosAndResult(pos1, self.e[1])
-        diff = pos2 - self.currentPos
+        nextPos = self.currentPos
+        for i in range(len(self.e)):
+            nextPos, nextFunResult = self.getNextPosAndResult(nextPos, self.e[i])
+        diff = nextPos - self.currentPos
         # self.vectors.append([self.currentPos, pos1])
         # self.vectors.append([pos1, pos2])
-        newE = diff/(np.linalg.norm(pos2 - self.currentPos))
+        newE = diff/(np.linalg.norm(nextPos - self.currentPos))
         return newE
 
 
     def switchMoveDirection(self, newE):
-        x= self.e[1]
-        self.e[0] = self.e[1]
-        self.e[1] = newE
+        for i in range(len(self.e)-1):
+            self.e[i] = self.e[i+1]
+        self.e[len(self.e)-1] = newE
 
     def getLowestPos(self):
         while True:
             self.logs.append(str(self))
             self.path.append(tuple(self.currentPos))
-            localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[1])
+            localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[len(self.e)-1])
             stepsLimitReached = self.stepNumber == self.stepsLimit
             minFunDifferenceReached = abs(self.funResult - nextFunResult) <= self.epsilon
             minPosDifferenceReached = np.linalg.norm(self.currentPos- localMinPosition) <= self.epsilon
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
     # g=[]
-    x0 = [4, -5]
+    x0 = [-4, -5]
     # print("function", function)
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
