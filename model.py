@@ -15,7 +15,7 @@ class GaussSeidel:
         self.currentPos = np.array(startPoint, dtype="float")
         self.variables = sorted(fun.variables())
         self.funResult = self.getFunctionResult()
-        self.e= [np.array([1, 0]), np.array([0, 1])]
+        self.e= np.array(np.eye(len(self.variables)))
         self.logs = []
         self.vectors = []
 
@@ -30,7 +30,7 @@ class GaussSeidel:
         sum = 0
         H = lambda x: 0 if x < 0 else 1
         delta=self.epsilon
-        alpha = 10
+        alpha = 1000
         for gi in self.g:
             gVal= gi.evaluate(parameters)
             gArg = gVal + delta
@@ -52,14 +52,14 @@ class GaussSeidel:
         right = pos + e * (self.stepSize)
         left2 = pos + e* (-self.stepSize/4)
         right2 = pos + e * (self.stepSize/4)
-        mini = goldenSectionSearch(self.getFunctionResult, left, right, self.epsilon)
+        mini = goldenSectionSearch(self.variables, self.getFunctionResult, left, right, self.epsilon)
         miniVal = self.getFunctionResult(dict(zip(self.variables, mini)))
         return mini, miniVal
 
     def getNewE(self):
         pos1, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[0])
         pos2, nextFunResult = self.getNextPosAndResult(pos1, self.e[1])
-        diff = [pos2[0] - self.currentPos[0], pos2[1] - self.currentPos[1]]
+        diff = pos2 - self.currentPos
         # self.vectors.append([self.currentPos, pos1])
         # self.vectors.append([pos1, pos2])
         newE = diff/(np.linalg.norm(pos2 - self.currentPos))
@@ -94,12 +94,13 @@ if __name__ == '__main__':
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
     # g=[]
-    x0 = [-2, 4]
+    x0 = [4, -5]
     # print("function", function)
     function = parser.parse(functionStr)
-    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 0.5, 10e-3, 3000)
+    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
     pos = cg.getLowestPos()
     print('\n'.join(cg.logs))
     print("final pos: ", [round(x, 3) for x in pos])
-    print("g(x): ", [parser.parse(gi).evaluate({"x1": pos[0], "x2": pos[1]}) for gi in g])
-    plot(cg)
+    print("g(x): ", [parser.parse(gi).evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g])
+    if len(function.variables()) < 3: 
+        plot(cg)

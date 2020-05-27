@@ -26,6 +26,9 @@ def calculate():
     g3 = request.args.get('g3')
     g4 = request.args.get('g4')
     g5 = request.args.get('g5')
+    x3 = request.args.get('x3')
+    x4 = request.args.get('x4')
+    x5 = request.args.get('x5')
 
     g1 and g.append(g1)
     g2 and g.append(g2)
@@ -36,18 +39,22 @@ def calculate():
     g = [parser.parse(gi) for gi in g]
 
     startPoint = [float(request.args.get('x1')), float(request.args.get('x2'))]
-    print(function, g1, g2, g3, startPoint)
-    localStepSize = float(request.args.get('localStepSize', '10'))
+    x3 and startPoint.append(x3)
+    x4 and startPoint.append(x4)
+    x5 and startPoint.append(x5)
+    print("new run", function, g1, g2, g3, startPoint)
+    localStepSize = float(request.args.get('localStepSize', '50'))
     epsilon = float(request.args.get('epsilon', '10e-3'))
     stepsLimit = int(request.args.get('stepsLimit', '3000'))
     function = parser.parse(function)
-    Process(target=showGraph, args=(function, g, startPoint, localStepSize, epsilon, stepsLimit)).start()
+    if len(function.variables()) < 3: 
+        Process(target=showGraph, args=(function, g, startPoint, localStepSize, epsilon, stepsLimit)).start()
     cg = GaussSeidel(function, g, startPoint, localStepSize, epsilon, stepsLimit)
     pos = cg.getLowestPos()
     result = {
         "pos": pos,
         "logs": cg.logs,
-        "g": [gi.evaluate({"x1": pos[0], "x2": pos[1]}) for gi in g]
+        "g": [gi.evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g]
     }
     return result
 
