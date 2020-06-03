@@ -17,6 +17,8 @@ class GaussSeidel:
         self.funResult = self.getFunctionResult()
         self.e= np.array(np.eye(len(self.variables)))
         self.logs = []
+        self.phi=[1, 1, 1, 1, 1]
+        self.theta=[1, 1, 1, 1, 1]
         self.vectors = []
 
     def __str__(self):
@@ -45,7 +47,7 @@ class GaussSeidel:
         parameters = dict(zip(self.variables, self.currentPos))
         if replace_val:
             parameters.update(replace_val)
-        return self.fun.evaluate(parameters)+ self.calculatePunishment(parameters)
+        return self.fun.evaluate(parameters) + self.calculatePunishment(parameters)
 
     def getNextPosAndResult(self, pos, e):
         left = pos + e* (-self.stepSize)
@@ -64,8 +66,15 @@ class GaussSeidel:
         # self.vectors.append([self.currentPos, pos1])
         # self.vectors.append([pos1, pos2])
         newE = diff/(np.linalg.norm(nextPos - self.currentPos))
-        return newE
+        return self.e[0].copy()
 
+    def getC(self, X):
+        c = 0
+        for gi in self.g:
+            gVal= gi.evaluate(parameters)
+            if c < abs(gVal):
+                c = abs(gVal)
+        return c
 
     def switchMoveDirection(self, newE):
         for i in range(len(self.e)-1):
