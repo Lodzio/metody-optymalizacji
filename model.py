@@ -23,9 +23,12 @@ class GaussSeidel:
 
     def __str__(self):
         parameters = dict(zip(self.variables, self.currentPos))
-        strPoint = [str(round(axis, 3)) for axis in self.currentPos]
+        strPoint = [str(round(axis, 2)) for axis in self.currentPos]
         strFVal = self.fun.evaluate(parameters)
-        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}"
+        g1 = str(self.g[0].evaluate(parameters))
+        g2 = str(self.g[1].evaluate(parameters))
+        c = str(self.getC(parameters))
+        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}, c: {c}, g1: {g1} g2: {g2}"
         return result
 
     def calculatePunishment(self, parameters):
@@ -71,7 +74,7 @@ class GaussSeidel:
     def getC(self, X):
         c = 0
         for gi in self.g:
-            gVal= gi.evaluate(dict(zip(self.variables, X)))
+            gVal= gi.evaluate(X)
             if gVal > 0 and c < abs(gVal):
                 c = abs(gVal)
         return c
@@ -97,7 +100,7 @@ class GaussSeidel:
             self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
-            print("c: ", self.getC(localMinPosition))
+#             print("c: ", self.getC(localMinPosition))
             self.switchMoveDirection(self.getNewE())
 
 
@@ -106,7 +109,7 @@ if __name__ == '__main__':
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
     # g=[]
-    x0 = [-4, -5]
+    x0 = [0, 0]
     # print("function", function)
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
