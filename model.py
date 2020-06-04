@@ -71,8 +71,8 @@ class GaussSeidel:
     def getC(self, X):
         c = 0
         for gi in self.g:
-            gVal= gi.evaluate(parameters)
-            if c < abs(gVal):
+            gVal= gi.evaluate(dict(zip(self.variables, X)))
+            if gVal > 0 and c < abs(gVal):
                 c = abs(gVal)
         return c
 
@@ -84,6 +84,7 @@ class GaussSeidel:
     def getLowestPos(self):
         while True:
             self.logs.append(str(self))
+            print(self)
             self.path.append(tuple(self.currentPos))
             localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[len(self.e)-1])
             stepsLimitReached = self.stepNumber == self.stepsLimit
@@ -96,6 +97,7 @@ class GaussSeidel:
             self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
+            print("c: ", self.getC(localMinPosition))
             self.switchMoveDirection(self.getNewE())
 
 
@@ -109,7 +111,7 @@ if __name__ == '__main__':
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
     pos = cg.getLowestPos()
-    print('\n'.join(cg.logs))
+#     print('\n'.join(cg.logs))
     print("final pos: ", [round(x, 3) for x in pos])
     print("g(x): ", [parser.parse(gi).evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g])
     if len(function.variables()) < 3: 
