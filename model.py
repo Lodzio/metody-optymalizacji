@@ -97,7 +97,7 @@ class GaussSeidel:
             gVal = self.g[i].evaluate(parameters)
             if (self.c0*self.m1 > abs(gVal)) and (gVal + self.theta[i] > 0):
                 self.theta[i]=self.theta[i]/self.m2
-                self.phi[i]=self.m2*self.phi(i)
+                self.phi[i]=self.m2*self.phi[i]
         self.lastStep6 = True
 
     def step7i(self):
@@ -120,18 +120,19 @@ class GaussSeidel:
             minFunDifferenceReached = abs(self.funResult - nextFunResult) <= self.epsilon
             minPosDifferenceReached = np.linalg.norm(self.currentPos- localMinPosition) <= self.epsilon
             cMinReached = self.cmin > self.c
-            if stepsLimitReached or (minPosDifferenceReached and minFunDifferenceReached) or cMinReached:
+            if stepsLimitReached or (minPosDifferenceReached and minFunDifferenceReached):
                 return tuple(self.currentPos)
-            if self.c < self.c0:
-                if self.stepNumber == 0 or self.lastStep6 == True:
-                    self.step7i()
-                elif self.c<self.m1*self.c0:
-                    self.step6()
+            if not cMinReached:
+                if self.c < self.c0:
+                    if self.stepNumber == 0 or self.lastStep6 == True:
+                        self.step7i()
+                    elif self.c<self.m1*self.c0:
+                        self.step6()
+                    else:
+                        self.step7i()
                 else:
-                    self.step7i()
-            else:
-                self.c = self.c0
-                self.step6()
+                    self.c = self.c0
+                    self.step6()
             self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
@@ -143,7 +144,7 @@ if __name__ == '__main__':
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
     # g=[]
-    x0 = [-4, -10]
+    x0 = [0, 1]
     # print("function", function)
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
