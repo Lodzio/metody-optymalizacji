@@ -105,7 +105,7 @@ class GaussSeidel:
         for i in range(len(self.g)):
             parameters = dict(zip(self.variables, self.currentPos))
             gVal = self.g[i].evaluate(parameters)
-            self.theta[i] = min(gVal+self.theta[i], 0)
+            self.theta[i] = max(gVal+self.theta[i], 0)
 
     def getLowestPos(self):
         while True:
