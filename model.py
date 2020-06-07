@@ -12,14 +12,21 @@ class GaussSeidel:
         self.stepSize = stepSize
         self.path = []
         self.stepNumber = 0
+        self.phi=[1, 1, 1, 1, 1]
+        self.theta=[0, 0, 0, 0, 0]
         self.currentPos = np.array(startPoint, dtype="float")
         self.variables = sorted(fun.variables())
         self.funResult = self.getFunctionResult()
         self.e= np.array(np.eye(len(self.variables)))
         self.logs = []
-        self.phi=[1, 1, 1, 1, 1]
-        self.theta=[1, 1, 1, 1, 1]
+
         self.vectors = []
+        self.cmin = 0.01
+        self.c0 = 1
+        self.c = 1
+        self.m1 = 0.25
+        self.m2 = 10.0
+        self.lastStep6 = False
 
     def __str__(self):
         parameters = dict(zip(self.variables, self.currentPos))
@@ -34,12 +41,11 @@ class GaussSeidel:
     def calculatePunishment(self, parameters):
         sum = 0
         H = lambda x: 0 if x < 0 else 1
-        delta=self.epsilon
-        alpha = 1000
-        for gi in self.g:
+        for i in range(len(self.g)):
+            gi = self.g[i]
             gVal= gi.evaluate(parameters)
-            gArg = gVal + delta
-            deltaFun = alpha*(gArg**2)*H(gArg)
+            gArg = gVal + self.theta[i]
+            deltaFun = self.phi[i]*(gArg**2)*H(gArg)
             # print(gVal, H(gVal), deltaFun)
             sum+=deltaFun
 
@@ -73,9 +79,10 @@ class GaussSeidel:
 
     def getC(self, X):
         c = 0
-        for gi in self.g:
+        for i in range(len(self.g)):
+            gi = self.g[i]
             gVal= gi.evaluate(X)
-            if gVal > 0 and c < abs(gVal):
+            if gVal + self.theta[i] > 0 and c < abs(gVal):
                 c = abs(gVal)
         return c
 
@@ -84,23 +91,50 @@ class GaussSeidel:
             self.e[i] = self.e[i+1]
         self.e[len(self.e)-1] = newE
 
+    def step6(self):
+        for i in range(len(self.g)):
+            parameters = dict(zip(self.variables, self.currentPos))
+            gVal = self.g[i].evaluate(parameters)
+            if (self.c0*self.m1 > abs(gVal)) and (gVal + self.theta[i] > 0):
+                self.theta[i]=self.theta[i]/self.m2
+                self.phi[i]=self.m2*self.phi(i)
+        self.lastStep6 = True
+
+    def step7i(self):
+        self.lastStep6 = False
+        for i in range(len(self.g)):
+            parameters = dict(zip(self.variables, self.currentPos))
+            gVal = self.g[i].evaluate(parameters)
+            self.theta[i] = min(gVal+self.theta[i], 0)
+
     def getLowestPos(self):
         while True:
             self.logs.append(str(self))
             print(self)
             self.path.append(tuple(self.currentPos))
             localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[len(self.e)-1])
+            self.c0 = self.c
+            parameters = dict(zip(self.variables, localMinPosition))
+            self.c = self.getC(parameters)
             stepsLimitReached = self.stepNumber == self.stepsLimit
             minFunDifferenceReached = abs(self.funResult - nextFunResult) <= self.epsilon
             minPosDifferenceReached = np.linalg.norm(self.currentPos- localMinPosition) <= self.epsilon
-
-            if stepsLimitReached or (minPosDifferenceReached and minFunDifferenceReached):
+            cMinReached = self.cmin > self.c
+            if stepsLimitReached or (minPosDifferenceReached and minFunDifferenceReached) or cMinReached:
                 return tuple(self.currentPos)
-
+            if self.c < self.c0:
+                if self.stepNumber == 0 or self.lastStep6 == True:
+                    self.step7i()
+                elif self.c<self.m1*self.c0:
+                    self.step6()
+                else:
+                    self.step7i()
+            else:
+                self.c = self.c0
+                self.step6()
             self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
-#             print("c: ", self.getC(localMinPosition))
             self.switchMoveDirection(self.getNewE())
 
 
@@ -109,7 +143,7 @@ if __name__ == '__main__':
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
     # g=[]
-    x0 = [0, 0]
+    x0 = [-4, -10]
     # print("function", function)
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
