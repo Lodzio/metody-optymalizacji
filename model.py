@@ -12,7 +12,7 @@ class GaussSeidel:
         self.stepSize = stepSize
         self.path = []
         self.stepNumber = 0
-        self.phi=[1, 1, 1, 1, 1]
+        self.sigma=[1000, 1000, 1000, 1000, 1000]
         self.theta=[0, 0, 0, 0, 0]
         self.currentPos = np.array(startPoint, dtype="float")
         self.variables = sorted(fun.variables())
@@ -45,12 +45,11 @@ class GaussSeidel:
             gi = self.g[i]
             gVal= gi.evaluate(parameters)
             gArg = gVal + self.theta[i]
-            deltaFun = self.phi[i]*(gArg**2)*H(gArg)
+            deltaFun = self.sigma[i]*(gArg**2)*H(gArg)
             # print(gVal, H(gVal), deltaFun)
             sum+=deltaFun
 
         return sum
-
 
     def getFunctionResult(self, replace_val=None):
         parameters = dict(zip(self.variables, self.currentPos))
@@ -97,7 +96,7 @@ class GaussSeidel:
             gVal = self.g[i].evaluate(parameters)
             if (self.c0*self.m1 > abs(gVal)) and (gVal + self.theta[i] > 0):
                 self.theta[i]=self.theta[i]/self.m2
-                self.phi[i]=self.m2*self.phi[i]
+                self.sigma[i]=self.m2*self.sigma[i]
         self.lastStep6 = True
 
     def step7i(self):
@@ -138,18 +137,14 @@ class GaussSeidel:
             self.stepNumber += 1
             self.switchMoveDirection(self.getNewE())
 
-
 if __name__ == '__main__':
     parser = Parser()
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
-    # g=[]
     x0 = [0, 1]
-    # print("function", function)
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
     pos = cg.getLowestPos()
-#     print('\n'.join(cg.logs))
     print("final pos: ", [round(x, 3) for x in pos])
     print("g(x): ", [parser.parse(gi).evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g])
     if len(function.variables()) < 3: 
