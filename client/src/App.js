@@ -5,43 +5,43 @@ import axios from "axios";
 class App extends React.Component {
   state = {
     params: {
-      // function: "(x1+x3-2)^2+(x1-x2^2)^2",
-      // g1: "x1+x2-2",
-      // g2: "2*x1^2-x2",
-      // g3: "",
-      // g4: "",
-      // g5: "",
-      // x1: "-2",
-      // x2: "0",
-      function: "",
-      g1: "",
-      g2: "",
+      function: "(x1-2)^2+(x1-x2^2)^2",
+      g1: "x1+x2-2",
+      g2: "2*x1^2-x2",
       g3: "",
       g4: "",
       g5: "",
-      x1: "",
-      x2: "",
+      x1: "-2",
+      x2: "0"
+      // function: "",
+      // g1: "",
+      // g2: "",
+      // g3: "",
+      // g4: "",
+      // g5: "",
+      // x1: "",
+      // x2: "",
     },
     result: {
       pos: [],
       logs: [],
-      g: [],
+      g: []
     },
-    error: "",
+    error: ""
   };
   onGenerate = () => {
     axios
       .get("http://127.0.0.1:5000/", { params: this.state.params })
-      .then((result) => {
+      .then(result => {
         console.log(result.data);
         this.setState({ result: result.data, error: "" });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
         this.setState({ error: "nie udało się wygenerować" });
       });
   };
-  onChange = (event) => {
+  onChange = event => {
     const params = { ...this.state.params };
     params[event.target.id] = event.target.value;
     this.setState({ params });
@@ -58,24 +58,38 @@ class App extends React.Component {
     return (
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ maxWidth: "30%" }}>
-          {this.withLabel("function", <Input id="function" onChange={this.onChange} />)}
-          {this.withLabel("g1", <Input id="g1" onChange={this.onChange} />)}
-          {this.withLabel("g2", <Input id="g2" onChange={this.onChange} />)}
+          {this.withLabel(
+            "function",
+            <Input id="function" value={this.state.params.function} onChange={this.onChange} />
+          )}
+          {this.withLabel("g1", <Input id="g1" value={this.state.params.g1} onChange={this.onChange} />)}
+          {this.withLabel("g2", <Input id="g2" value={this.state.params.g2} onChange={this.onChange} />)}
           {this.withLabel("g3", <Input id="g3" onChange={this.onChange} />)}
           {this.withLabel("g4", <Input id="g4" onChange={this.onChange} />)}
           {this.withLabel("g5", <Input id="g5" onChange={this.onChange} />)}
-          {this.withLabel("x1", <Input id="x1" onChange={this.onChange} />)}
-          {this.withLabel("x2", <Input id="x2" onChange={this.onChange} />)}
+          {this.withLabel("x1", <Input id="x1" value={this.state.params.x1} onChange={this.onChange} />)}
+          {this.withLabel("x2", <Input id="x2" value={this.state.params.x2} onChange={this.onChange} />)}
           {this.withLabel("x3", <Input id="x3" onChange={this.onChange} />)}
           {this.withLabel("x4", <Input id="x4" onChange={this.onChange} />)}
           {this.withLabel("x5", <Input id="x5" onChange={this.onChange} />)}
-          {this.withLabel("localStepSize", <Input id="localStepSize" onChange={this.onChange} />)}
-          {this.withLabel("epsilon", <Input id="epsilon" onChange={this.onChange} />)}
-          {this.withLabel("stepsLimit", <Input id="stepsLimit" onChange={this.onChange} />)}
+          {this.withLabel(
+            "localStepSize",
+            <Input id="localStepSize" onChange={this.onChange} />
+          )}
+          {this.withLabel(
+            "epsilon",
+            <Input id="epsilon" onChange={this.onChange} />
+          )}
+          {this.withLabel(
+            "stepsLimit",
+            <Input id="stepsLimit" onChange={this.onChange} />
+          )}
           <Button onClick={this.onGenerate}>Generate</Button>
         </div>
-        <div style={{ marginTop: "20px" }}>result: [{String(this.state.result.pos)}]</div>
-        {this.state.result.logs.map((log) => (
+        <div style={{ marginTop: "20px" }}>
+          result: [{String(this.state.result.pos)}]
+        </div>
+        {this.state.result.logs.map(log => (
           <div key={log} style={{ marginTop: "20px" }}>
             {String(log)}
           </div>
