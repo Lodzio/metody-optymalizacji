@@ -1,9 +1,11 @@
 TO DO:
 f1 = himelblaua => g = x1^2 + x2^2 <= 1
+
 f2 = 2*x1^2-1.05*x1^4+(1/6)*x1^6+x1*x2+x2^2, g=x2>=x1^2+1
-iteracje tylko powella, 
-3 tablice dla powella, dla kazdej funkcji
-wyniki powinny byc być widoczne na screenie w 5.1
+
+iteracje tylko powella, 3 tablice dla powella, dla kazdej funkcji
+
+dodać wyniki dla przykładowego x0, powinny byc być widoczne na screenie w 5.1
 
 
 
