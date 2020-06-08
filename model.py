@@ -141,9 +141,9 @@ if __name__ == '__main__':
     parser = Parser()
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
-    x0 = [0, 1]
+    x0 = [-4, 2]
     function = parser.parse(functionStr)
-    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-3, 3000)
+    cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-5, 3000)
     pos = cg.getLowestPos()
     print("final pos: ", [round(x, 3) for x in pos])
     print("g(x): ", [parser.parse(gi).evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g])

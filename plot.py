@@ -3,10 +3,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-
 def getFuntionResult(parser_fun, fun, *args):
     parameters = dict(zip(parser_fun.variables(), args))
-    # return 1/fun(parameters)
+#     return 1/fun(parameters)
     return parser_fun.evaluate(parameters)
 
 
