@@ -1,0 +1,11 @@
+f1 = himelblaua => g = x1^2 + x2^2 <= 1
+f2 = 2*x1^2-1.05*x1^4+(1/6)*x1^6+x1*x2+x2^2, g=x2>=x1^2+1
+iteracje tylko powella, ogranioczenia dokladnosc 0.1
+cmin = 0.1
+3 tablice dla powella, dla kazdej funkcji
+omowienie opisu zadania (tzn jakie sa ograniczenia g(x) < 0)
+opisac wszystkie kroki
+usunac c = 1
+wyniki powinny byc być widoczne na screenie
+wywalic w rozdziale 6 resoults
+
