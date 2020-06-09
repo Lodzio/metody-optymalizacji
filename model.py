@@ -21,7 +21,7 @@ class GaussSeidel:
         self.funResult = self.getFunctionResult()
         self.e= np.array(np.eye(len(self.variables)))
         self.logs = []
-        self.finalMatrix = []
+        self.finalMatrix = [['x1', 'x2', 'f', 'c', 'iteracja']]
 
         self.vectors = []
         self.cmin = 0.1
@@ -40,7 +40,8 @@ class GaussSeidel:
 #         g2 = str(self.g[1].evaluate(parameters))
         c = str(self.getC(parameters))
         result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}, c: {c}, " + ','.join(g)
-#         self.finalMatrix.append([round(self.currentPos[0], 3), round(self.currentPos[1], 3), round(strFVal, 3), round(c, 3), self.stepNumber])
+        transform = lambda value: str(round(value, 3))
+        self.finalMatrix.append([transform(self.currentPos[0]), transform(self.currentPos[1]), transform(strFVal), transform(self.c), self.stepNumber])
         return result
 
     def calculatePunishment(self, parameters):
@@ -156,5 +157,5 @@ if __name__ == '__main__':
 
     # to gowno powinno byc wyodrebnione ale mi sie nie chce
     data = OrderedDict()
-    data.update({"Sheet 1": [[1, 2, 3], [4, 5, 6]]})
-    save_data("your_file.ods", data)
+    data.update({"Sheet 1": cg.finalMatrix})
+    save_data("result.ods", data)
