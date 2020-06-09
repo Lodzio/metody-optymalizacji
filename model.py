@@ -2,6 +2,8 @@ import numpy as np
 from py_expression_eval import Parser
 from goldenSection import goldenSectionSearch
 from plot import plot
+from pyexcel_ods import save_data
+from collections import OrderedDict
 
 class GaussSeidel:
     def __init__(self, fun, g,startPoint, stepSize, epsilon, stepsLimit):
@@ -12,13 +14,14 @@ class GaussSeidel:
         self.stepSize = stepSize
         self.path = []
         self.stepNumber = 0
-        self.sigma=[1000, 1000, 1000, 1000, 1000]
+        self.sigma=[1, 1, 1, 1, 1]
         self.theta=[0, 0, 0, 0, 0]
         self.currentPos = np.array(startPoint, dtype="float")
         self.variables = sorted(fun.variables())
         self.funResult = self.getFunctionResult()
         self.e= np.array(np.eye(len(self.variables)))
         self.logs = []
+        self.finalMatrix = []
 
         self.vectors = []
         self.cmin = 0.1
@@ -37,6 +40,7 @@ class GaussSeidel:
 #         g2 = str(self.g[1].evaluate(parameters))
         c = str(self.getC(parameters))
         result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}, c: {c}, " + ','.join(g)
+#         self.finalMatrix.append([round(self.currentPos[0], 3), round(self.currentPos[1], 3), round(strFVal, 3), round(c, 3), self.stepNumber])
         return result
 
     def calculatePunishment(self, parameters):
@@ -91,19 +95,17 @@ class GaussSeidel:
             self.e[i] = self.e[i+1]
         self.e[len(self.e)-1] = newE
 
-    def step6(self):
+    def step6(self, parameters):
         for i in range(len(self.g)):
-            parameters = dict(zip(self.variables, self.currentPos))
             gVal = self.g[i].evaluate(parameters)
             if (self.c0*self.m1 > abs(gVal)) and (gVal + self.theta[i] > 0):
                 self.theta[i]=self.theta[i]/self.m2
                 self.sigma[i]=self.m2*self.sigma[i]
         self.lastStep6 = True
 
-    def step7i(self):
+    def step8i(self, parameters):
         self.lastStep6 = False
         for i in range(len(self.g)):
-            parameters = dict(zip(self.variables, self.currentPos))
             gVal = self.g[i].evaluate(parameters)
             self.theta[i] = max(gVal+self.theta[i], 0)
 
@@ -125,14 +127,14 @@ class GaussSeidel:
             if not cMinReached:
                 if self.c < self.c0:
                     if self.stepNumber == 0 or self.lastStep6 == True:
-                        self.step7i()
+                        self.step8i(parameters)
                     elif self.c<self.m1*self.c0:
-                        self.step6()
+                        self.step6(parameters)
                     else:
-                        self.step7i()
+                        self.step8i(parameters)
                 else:
                     self.c = self.c0
-                    self.step6()
+                    self.step6(parameters)
             self.currentPos = localMinPosition
             self.funResult = nextFunResult
             self.stepNumber += 1
@@ -142,11 +144,17 @@ if __name__ == '__main__':
     parser = Parser()
     functionStr = "(x1-2)^2+(x1-x2^2)^2"
     g=["x1+x2-2", "2*x1^2-x2"]
-    x0 = [-4, 2]
+    x0 = [-10, 1.3]
     function = parser.parse(functionStr)
     cg = GaussSeidel(function, [parser.parse(gi) for gi in g], x0, 100, 10e-5, 3000)
     pos = cg.getLowestPos()
-    print("final pos: ", [round(x, 3) for x in pos])
+
+    print("final pos: ", [round(x, 3) for x in pos], 'f(x):', function.evaluate(dict(zip(sorted(function.variables()), pos))))
     print("g(x): ", [parser.parse(gi).evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g])
-    if len(function.variables()) < 3: 
-        plot(cg)
+#     if len(function.variables()) < 3:
+#         plot(cg)
+
+    # to gowno powinno byc wyodrebnione ale mi sie nie chce
+    data = OrderedDict()
+    data.update({"Sheet 1": [[1, 2, 3], [4, 5, 6]]})
+    save_data("your_file.ods", data)
