@@ -91,7 +91,7 @@ class App extends React.Component {
         </div>
         {this.state.result.g.map((g, i) => (
             <div key={i} style={{ marginTop: "20px" }}>
-              g{i+i}:{String(g)}
+              g{i+1}:{String(g)}
             </div>
         ))}
         {this.state.result.logs.map(log => (
