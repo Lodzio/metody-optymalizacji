@@ -51,9 +51,11 @@ def calculate():
         Process(target=showGraph, args=(function, g, startPoint, localStepSize, epsilon, stepsLimit)).start()
     cg = GaussSeidel(function, g, startPoint, localStepSize, epsilon, stepsLimit)
     pos = cg.getLowestPos()
+    parameters = dict(zip(cg.variables, pos))
     result = {
         "pos": pos,
         "logs": cg.logs,
+        "f": function.evaluate(parameters),
         "g": [gi.evaluate(dict(zip(sorted(function.variables()), pos))) for gi in g]
     }
     return result

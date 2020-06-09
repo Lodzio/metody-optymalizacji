@@ -21,7 +21,7 @@ class GaussSeidel:
         self.logs = []
 
         self.vectors = []
-        self.cmin = 0.01
+        self.cmin = 0.1
         self.c0 = 1
         self.c = 1
         self.m1 = 0.25
@@ -32,10 +32,11 @@ class GaussSeidel:
         parameters = dict(zip(self.variables, self.currentPos))
         strPoint = [str(round(axis, 2)) for axis in self.currentPos]
         strFVal = self.fun.evaluate(parameters)
-        g1 = str(self.g[0].evaluate(parameters))
-        g2 = str(self.g[1].evaluate(parameters))
+        g = [f"g[{i+1}]={self.g[i].evaluate(parameters)}" for i in range(len(self.g))]
+#         g1 = str(self.g[0].evaluate(parameters))
+#         g2 = str(self.g[1].evaluate(parameters))
         c = str(self.getC(parameters))
-        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}, c: {c}, g1: {g1} g2: {g2}"
+        result = f"{self.stepNumber}: f({', '.join(strPoint)}) = {strFVal}, c: {c}, " + ','.join(g)
         return result
 
     def calculatePunishment(self, parameters):
@@ -109,7 +110,7 @@ class GaussSeidel:
     def getLowestPos(self):
         while True:
             self.logs.append(str(self))
-            print(self)
+#             print(self)
             self.path.append(tuple(self.currentPos))
             localMinPosition, nextFunResult = self.getNextPosAndResult(self.currentPos, self.e[len(self.e)-1])
             self.c0 = self.c

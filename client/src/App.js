@@ -87,8 +87,13 @@ class App extends React.Component {
           <Button onClick={this.onGenerate}>Generate</Button>
         </div>
         <div style={{ marginTop: "20px" }}>
-          result: [{String(this.state.result.pos)}]
+          result: f({String(this.state.result.pos)})={String(this.state.result.f)}
         </div>
+        {this.state.result.g.map((g, i) => (
+            <div key={i} style={{ marginTop: "20px" }}>
+              g{i+i}:{String(g)}
+            </div>
+        ))}
         {this.state.result.logs.map(log => (
           <div key={log} style={{ marginTop: "20px" }}>
             {String(log)}
@@ -98,7 +103,7 @@ class App extends React.Component {
           <div key={i} style={{ marginTop: "20px" }}>
             g{i}:{String(g)}
           </div>
-        ))}{" "}
+        ))}
         {this.state.error && <div>{this.state.error}</div>}
       </div>
     );
